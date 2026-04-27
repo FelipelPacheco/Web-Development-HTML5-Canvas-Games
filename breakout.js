@@ -19,8 +19,8 @@ let larguraRaquete = 75;
 let travaFimRaquete;
 
 //Bola
-let bolaX = 30;
-let bolaY = 100;
+let bolaX = 287;
+let bolaY = 362;
 let tamanhoBola = 15;
 let velocidadeX = 3;
 let velocidadeY = 3;
@@ -67,11 +67,15 @@ function executarJogo() {
   movimentarRaquete();
   verificarColisoes();
   
-  // Desenhos e Pontos (parte visual)
+  // Desenho da Bolinha
   fill(255);
   ellipse(bolaX, bolaY, tamanhoBola);
+  
+  // Desenho da Raquete
   fill(255);
   rect(raqueteX, raqueteY, larguraRaquete, alturaRaquete);
+  
+  // Desenho do Placar
   fill(0);
   textAlign(LEFT);
   textSize(12);
@@ -87,10 +91,11 @@ function gerenciarBlocos() {
       blocosvivos++; 
       
       if (bolaY < b.y + alturaBloco + 7 && bolaY > b.y - 7 && bolaX > b.x - 7 && bolaX < b.x + larguraBloco + 7) {
-          velocidadeY *= -1;
-          b.vivo = false;
+          velocidadeY *= -1; // Altera a bolinha
+          b.vivo = false; // Destrói o bloco
           pontos += 10;
       }
+      // Desenha o bloco
       fill(255, 0, 0);
       rect(b.x, b.y, larguraBloco, alturaBloco);
     }
@@ -106,10 +111,12 @@ function movimentarBolinha() {
   bolaX += velocidadeX;
   bolaY += velocidadeY;
   
-  // Colisão com as bordas laterais e topo
+  // Colisão com as bordas laterais
   if (bolaX < 0 || bolaX > largura) {
     velocidadeX *= -1;
   }
+  
+  //Colisão com o topo
   if (bolaY < 0) {
     velocidadeY *= -1;
   }
@@ -132,7 +139,7 @@ function verificarColisoes() {
   // Colisão com a raquete
   if (bolaY > raqueteY - tamanhoBola/2 && bolaX > raqueteX && bolaX < raqueteX + larguraRaquete) {
     velocidadeY *= -1;
-    bolaY = raqueteY - tamanhoBola/2;
+    bolaY = raqueteY - tamanhoBola/2; // Ajusta a posição para não grudar na raquete por conta do raio
   }
 }
 
@@ -161,7 +168,9 @@ function vitoria() {
 }
 
 function gerarBlocos() {
+  // Zera o array de blocos
   blocos = []; 
+  // Cria uma grade de 9 colunas (i) por 5 linhas (j)
   for (let i = 0; i < 9; i++) {
     for (let j = 0; j < 5; j++) {
       blocos.push({ 
@@ -175,8 +184,10 @@ function gerarBlocos() {
 
 function reiniciar() {
   pontos = 0;
-  bolaX = 30;
-  bolaY = 100;
+  bolaX = 287;
+  bolaY = 362;
+  raqueteX = 250;
+  raqueteY = 370;
   velocidadeX = 3;
   velocidadeY = 3;
   gerarBlocos(); 
