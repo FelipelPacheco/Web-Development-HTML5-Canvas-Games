@@ -27,6 +27,16 @@ let velocidadeBolaX = 2;
 let velocidadeBolaY = 2;
 let raio = tamanhoBola / 2;
 
+let somColisao;
+let fimJogo;
+let win;
+
+function preload() {
+  somColisao = loadSound('colisao.mp3');
+  fimJogo = loadSound('gameover_1.mp3');
+  win = loadSound('vitoria.mp3');
+}
+
 function setup() {
   createCanvas(largura, altura);
   travaFimRaquete = largura - larguraRaquete;
@@ -97,6 +107,7 @@ function gerenciarBlocos() {
     
           b.vivo = false; 
           pontos += 10;
+          somColisao.play();
     
           if (bolaX > b.x && bolaX < b.x + larguraBloco) {
               velocidadeBolaY *= -1; 
@@ -113,6 +124,11 @@ function gerenciarBlocos() {
       
       fill(255, 0, 0);
       rect(b.x, b.y, larguraBloco, alturaBloco);
+      
+      if (blocosvivos == 0) {
+      win.play(); // Toca o som apenas UMA vez no frame exato da vitória
+      tela = 3;
+      }
     }
   }
 
@@ -136,7 +152,10 @@ function movimentarBolinha() {
   }
   
   // Game Over se a bola cair
+  
+  
   if (bolaY > altura) {
+    fimJogo.play();
     tela = 2;
   }
 }
