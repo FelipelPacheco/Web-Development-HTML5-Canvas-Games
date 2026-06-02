@@ -6,6 +6,7 @@ let pontos = 0;
 let blocos = [];
 let alturaBloco = 20;
 let larguraBloco = 50;
+let blocosQuebrados = 0;
 
 //Canvas
 let largura = 600;
@@ -15,15 +16,16 @@ let altura = 400;
 let raqueteX = 250;
 let raqueteY = 370;
 let alturaRaquete = 15;
-let larguraRaquete = 75;
+let larguraRaquete = 95;
 let travaFimRaquete;
 
 //Bola
 let bolaX = 287;
 let bolaY = 362;
 let tamanhoBola = 15;
-let velocidadeX = 3;
-let velocidadeY = 3;
+let velocidadeBolaX = 2;
+let velocidadeBolaY = 2;
+let raio = tamanhoBola / 2;
 
 function setup() {
   createCanvas(largura, altura);
@@ -90,12 +92,25 @@ function gerenciarBlocos() {
     if (b.vivo) {
       blocosvivos++; 
       
-      if (bolaY < b.y + alturaBloco + 7 && bolaY > b.y - 7 && bolaX > b.x - 7 && bolaX < b.x + larguraBloco + 7) {
-          velocidadeY *= -1; // Altera a bolinha
-          b.vivo = false; // Destrói o bloco
+      if (bolaX + raio > b.x && bolaX - raio < b.x + larguraBloco &&
+          bolaY + raio > b.y && bolaY - raio < b.y + alturaBloco) {
+    
+          b.vivo = false; 
           pontos += 10;
+    
+          if (bolaX > b.x && bolaX < b.x + larguraBloco) {
+              velocidadeBolaY *= -1; 
+          } else {
+              velocidadeBolaX *= -1; 
+          }
+    
+          blocosQuebrados++;
+          if (blocosQuebrados % 5 === 0) {
+              velocidadeBolaX *= 1.2;
+              velocidadeBolaY *= 1.2;
+          }
       }
-      // Desenha o bloco
+      
       fill(255, 0, 0);
       rect(b.x, b.y, larguraBloco, alturaBloco);
     }
@@ -106,19 +121,18 @@ function gerenciarBlocos() {
   }
 }
 
-
 function movimentarBolinha() {
-  bolaX += velocidadeX;
-  bolaY += velocidadeY;
+  bolaX += velocidadeBolaX;
+  bolaY += velocidadeBolaY;
   
   // Colisão com as bordas laterais
   if (bolaX < 0 || bolaX > largura) {
-    velocidadeX *= -1;
+    velocidadeBolaX *= -1;
   }
   
   //Colisão com o topo
   if (bolaY < 0) {
-    velocidadeY *= -1;
+    velocidadeBolaY *= -1;
   }
   
   // Game Over se a bola cair
@@ -137,9 +151,9 @@ function movimentarRaquete() {
 
 function verificarColisoes() {
   // Colisão com a raquete
-  if (bolaY > raqueteY - tamanhoBola/2 && bolaX > raqueteX && bolaX < raqueteX + larguraRaquete) {
-    velocidadeY *= -1;
-    bolaY = raqueteY - tamanhoBola/2; // Ajusta a posição para não grudar na raquete por conta do raio
+  if (bolaY > raqueteY - raio && bolaX > raqueteX && bolaX < raqueteX + larguraRaquete) {
+    velocidadeBolaY *= -1;
+    bolaY = raqueteY - raio; // Ajusta a posição para não grudar na raquete por conta do raio
   }
 }
 
@@ -184,12 +198,13 @@ function gerarBlocos() {
 
 function reiniciar() {
   pontos = 0;
+  blocosQuebrados = 0; 
   bolaX = 287;
   bolaY = 362;
   raqueteX = 250;
   raqueteY = 370;
-  velocidadeX = 3;
-  velocidadeY = 3;
+  velocidadeBolaX = 2; 
+  velocidadeBolaY = 2; 
   gerarBlocos(); 
   tela = 0; 
 }
