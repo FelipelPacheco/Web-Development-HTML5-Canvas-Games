@@ -58,6 +58,17 @@ function draw() {
   else if (tela == 3) {
     vitoria();
   }
+  else if (tela == 4) {
+    sobre();
+  }
+}
+
+function sobre() {
+  text("* **Sistema de Pontuação**: Cada bloco destruído soma 10 pontos", largura/2, altura/2);
+  text("* **Condição de Vitória**: Quebrar todos os blocos existentes", largura/2, altura/2 + 20);
+  text("* **Game Over**: O jogo finaliza caso a bolinha ultrapasse a linha da raquete.", largura/2, altura/2 + 40);
+  text("Jogo feito por", largura/2, altura/2 + 100);
+  text("Felipe Luiz Pacheco", largura/2, altura/2 + 120);
 }
 
 function menu() {
@@ -67,9 +78,13 @@ function menu() {
   textSize(16);
   text("Instruções: Use as SETAS para mover a raquete", largura/2, altura/2 + 40);
   text("Pressione ENTER para começar", largura/2, altura/2 + 80);
+  text("Pressione S para ver a tela sobre", largura/2, altura/2 + 100);
   
   if (keyIsDown(ENTER)) {
     tela = 1;
+  }
+  if (keyIsDown(83)) {
+    tela = 4;
   }
 }
 
@@ -125,11 +140,12 @@ function gerenciarBlocos() {
       fill(255, 0, 0);
       rect(b.x, b.y, larguraBloco, alturaBloco);
       
-      if (blocosvivos == 0) {
+      
+    }
+    if (blocosvivos == 0) {
       win.play(); // Toca o som apenas UMA vez no frame exato da vitória
       tela = 3;
       }
-    }
   }
 
   if (blocosvivos == 0) {
