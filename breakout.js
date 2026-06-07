@@ -20,16 +20,57 @@ let larguraRaquete = 95;
 let travaFimRaquete;
 
 //Bola
-let bolaX = 287;
-let bolaY = 362;
-let tamanhoBola = 15;
-let velocidadeBolaX = 2;
-let velocidadeBolaY = 2;
-let raio = tamanhoBola / 2;
+let bola;
 
+//Som
 let somColisao;
 let fimJogo;
 let win;
+
+// CLASSE BOLA: 
+class Bola {
+  constructor(x, y) {
+    this.x = x;
+    this.y = y;
+    this.tamanho = 15;
+    this.raio = this.tamanho / 2;
+    this.velX = 2;
+    this.velY = 2;
+  }
+
+  desenhar() {
+    fill(255);
+    ellipse(this.x, this.y, this.tamanho);
+  }
+
+  mover() {
+    this.x += this.velX;
+    this.y += this.velY;
+    
+    // Colisão com as bordas laterais
+    if (this.x - this.raio < 0 || this.x + this.raio > largura) {
+      this.velX *= -1;
+    }
+    
+    // Colisão com o topo
+    if (this.y - this.raio < 0) {
+      this.velY *= -1;
+    }
+    
+    // Game Over se a bola cair
+    if (this.y > altura) {
+      fimJogo.play();
+      tela = 2;
+    }
+  }
+
+  checarColisaoRaquete(raqueteX, raqueteY, larguraRaquete) {
+    if (this.y > raqueteY - this.raio && this.x > raqueteX && this.x < raqueteX + larguraRaquete) {
+      this.velY *= -1;
+      this.y = raqueteY - this.raio; // Ajusta posição para não grudar na raquete
+    }
+  }
+}
 
 function preload() {
   somColisao = loadSound('colisao.mp3');
@@ -41,6 +82,7 @@ function setup() {
   createCanvas(largura, altura);
   travaFimRaquete = largura - larguraRaquete;
   gerarBlocos(); 
+  bola = new Bola(287, 362); // Criando o objeto bola
 }
 
 function draw() {
@@ -90,13 +132,11 @@ function menu() {
 
 function executarJogo() {
   gerenciarBlocos();
-  movimentarBolinha();
   movimentarRaquete();
-  verificarColisoes();
   
-  // Desenho da Bolinha
-  fill(255);
-  ellipse(bolaX, bolaY, tamanhoBola);
+  bola.mover();
+  bola.checarColisaoRaquete(raqueteX, raqueteY, larguraRaquete);
+  bola.desenhar();
   
   // Desenho da Raquete
   fill(255);
@@ -117,62 +157,36 @@ function gerenciarBlocos() {
     if (b.vivo) {
       blocosvivos++; 
       
-      if (bolaX + raio > b.x && bolaX - raio < b.x + larguraBloco &&
-          bolaY + raio > b.y && bolaY - raio < b.y + alturaBloco) {
+      // Valida se a bolinha toca o bloco
+      if (bola.x + bola.raio > b.x && bola.x - bola.raio < b.x + larguraBloco &&
+          bola.y + bola.raio > b.y && bola.y - bola.raio < b.y + alturaBloco) {
     
           b.vivo = false; 
           pontos += 10;
           somColisao.play();
     
-          if (bolaX > b.x && bolaX < b.x + larguraBloco) {
-              velocidadeBolaY *= -1; 
+          if (bola.x > b.x && bola.x < b.x + larguraBloco) {
+              bola.velY *= -1; 
           } else {
-              velocidadeBolaX *= -1; 
+              bola.velX *= -1; 
           }
     
           blocosQuebrados++;
+          // Aumenta a velocidade a cada 5 blocos quebrado
           if (blocosQuebrados % 5 === 0) {
-              velocidadeBolaX *= 1.2;
-              velocidadeBolaY *= 1.2;
+              bola.velX *= 1.2;
+              bola.velY *= 1.2;
           }
       }
       
       fill(255, 0, 0);
       rect(b.x, b.y, larguraBloco, alturaBloco);
-      
-      
     }
-    if (blocosvivos == 0) {
-      win.play(); // Toca o som apenas UMA vez no frame exato da vitória
-      tela = 3;
-      }
   }
 
   if (blocosvivos == 0) {
+    win.play(); 
     tela = 3;
-  }
-}
-
-function movimentarBolinha() {
-  bolaX += velocidadeBolaX;
-  bolaY += velocidadeBolaY;
-  
-  // Colisão com as bordas laterais
-  if (bolaX < 0 || bolaX > largura) {
-    velocidadeBolaX *= -1;
-  }
-  
-  //Colisão com o topo
-  if (bolaY < 0) {
-    velocidadeBolaY *= -1;
-  }
-  
-  // Game Over se a bola cair
-  
-  
-  if (bolaY > altura) {
-    fimJogo.play();
-    tela = 2;
   }
 }
 
@@ -181,14 +195,6 @@ function movimentarRaquete() {
     raqueteX -= 5;
   } else if(keyIsDown(RIGHT_ARROW) && raqueteX < travaFimRaquete){
     raqueteX += 5;
-  }
-}
-
-function verificarColisoes() {
-  // Colisão com a raquete
-  if (bolaY > raqueteY - raio && bolaX > raqueteX && bolaX < raqueteX + larguraRaquete) {
-    velocidadeBolaY *= -1;
-    bolaY = raqueteY - raio; // Ajusta a posição para não grudar na raquete por conta do raio
   }
 }
 
@@ -217,9 +223,7 @@ function vitoria() {
 }
 
 function gerarBlocos() {
-  // Zera o array de blocos
   blocos = []; 
-  // Cria uma grade de 9 colunas (i) por 5 linhas (j)
   for (let i = 0; i < 9; i++) {
     for (let j = 0; j < 5; j++) {
       blocos.push({ 
@@ -234,12 +238,9 @@ function gerarBlocos() {
 function reiniciar() {
   pontos = 0;
   blocosQuebrados = 0; 
-  bolaX = 287;
-  bolaY = 362;
   raqueteX = 250;
   raqueteY = 370;
-  velocidadeBolaX = 2; 
-  velocidadeBolaY = 2; 
+  bola = new Bola(287, 362); 
   gerarBlocos(); 
   tela = 0; 
 }
