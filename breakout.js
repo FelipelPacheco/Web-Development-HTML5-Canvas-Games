@@ -19,15 +19,14 @@ let alturaRaquete = 15;
 let larguraRaquete = 95;
 let travaFimRaquete;
 
-//Bola
-let bola;
-
 //Som
 let somColisao;
 let fimJogo;
 let win;
 
-// CLASSE BOLA: 
+//Bola
+let bola;
+
 class Bola {
   constructor(x, y) {
     this.x = x;
@@ -47,17 +46,17 @@ class Bola {
     this.x += this.velX;
     this.y += this.velY;
     
-    // Colisão com as bordas laterais
+    //Colisão com as bordas laterais
     if (this.x - this.raio < 0 || this.x + this.raio > largura) {
       this.velX *= -1;
     }
     
-    // Colisão com o topo
+    //Colisão com o topo
     if (this.y - this.raio < 0) {
       this.velY *= -1;
     }
     
-    // Game Over se a bola cair
+    //Game Over se a bola cair
     if (this.y > altura) {
       fimJogo.play();
       tela = 2;
@@ -82,7 +81,7 @@ function setup() {
   createCanvas(largura, altura);
   travaFimRaquete = largura - larguraRaquete;
   gerarBlocos(); 
-  bola = new Bola(287, 362); // Criando o objeto bola
+  bola = new Bola(287, 362);
 }
 
 function draw() {
@@ -106,11 +105,18 @@ function draw() {
 }
 
 function sobre() {
-  text("* **Sistema de Pontuação**: Cada bloco destruído soma 10 pontos", largura/2, altura/2);
-  text("* **Condição de Vitória**: Quebrar todos os blocos existentes", largura/2, altura/2 + 20);
-  text("* **Game Over**: O jogo finaliza caso a bolinha ultrapasse a linha da raquete.", largura/2, altura/2 + 40);
-  text("Jogo feito por", largura/2, altura/2 + 100);
-  text("Felipe Luiz Pacheco", largura/2, altura/2 + 120);
+  textAlign(CENTER);
+  text("Sistema de Pontuação: Cada bloco destruído soma 10 pontos", largura/2, altura/2 - 40);
+  text("Condição de Vitória: Quebrar todos os blocos existentes", largura/2, altura/2 - 20);
+  text("Game Over: O jogo finaliza caso a bolinha ultrapasse a linha da raquete.", largura/2, altura/2);
+  text("Pressione M para voltar ao menu", largura/2, altura/2 + 80);
+  text("Jogo feito por", largura/2, altura/2 + 140);
+  text("Felipe Luiz Pacheco", largura/2, altura/2 + 160);
+  
+  if (keyIsDown(77)) {
+    tela = 0;
+  }
+  
 }
 
 function menu() {
@@ -130,23 +136,17 @@ function menu() {
   }
 }
 
-function executarJogo() {
-  gerenciarBlocos();
-  movimentarRaquete();
-  
-  bola.mover();
-  bola.checarColisaoRaquete(raqueteX, raqueteY, larguraRaquete);
-  bola.desenhar();
-  
-  // Desenho da Raquete
-  fill(255);
-  rect(raqueteX, raqueteY, larguraRaquete, alturaRaquete);
-  
-  // Desenho do Placar
-  fill(0);
-  textAlign(LEFT);
-  textSize(12);
-  text("Pontos: " + pontos, 20, 20);
+function gerarBlocos() {
+  blocos = []; 
+  for (let i = 0; i < 9; i++) {
+    for (let j = 0; j < 5; j++) {
+      blocos.push({ 
+        x: i * 60 + 25, 
+        y: j * 25 + 50, 
+        vivo: true 
+      });
+    }
+  }
 }
 
 function gerenciarBlocos() {
@@ -157,7 +157,7 @@ function gerenciarBlocos() {
     if (b.vivo) {
       blocosvivos++; 
       
-      // Valida se a bolinha toca o bloco
+      //Validar se a bolinha tocou nos blocos
       if (bola.x + bola.raio > b.x && bola.x - bola.raio < b.x + larguraBloco &&
           bola.y + bola.raio > b.y && bola.y - bola.raio < b.y + alturaBloco) {
     
@@ -165,6 +165,7 @@ function gerenciarBlocos() {
           pontos += 10;
           somColisao.play();
     
+          //Muda a direção da bolinha
           if (bola.x > b.x && bola.x < b.x + larguraBloco) {
               bola.velY *= -1; 
           } else {
@@ -172,7 +173,6 @@ function gerenciarBlocos() {
           }
     
           blocosQuebrados++;
-          // Aumenta a velocidade a cada 5 blocos quebrado
           if (blocosQuebrados % 5 === 0) {
               bola.velX *= 1.2;
               bola.velY *= 1.2;
@@ -184,8 +184,9 @@ function gerenciarBlocos() {
     }
   }
 
+  //Condição de vitória
   if (blocosvivos == 0) {
-    win.play(); 
+    win.play();
     tela = 3;
   }
 }
@@ -196,6 +197,25 @@ function movimentarRaquete() {
   } else if(keyIsDown(RIGHT_ARROW) && raqueteX < travaFimRaquete){
     raqueteX += 5;
   }
+}
+
+function executarJogo() {
+  gerenciarBlocos();
+  movimentarRaquete();
+  
+  bola.mover();
+  bola.checarColisaoRaquete(raqueteX, raqueteY, larguraRaquete);
+  bola.desenhar();
+  
+  //Desenho da Raquete
+  fill(255);
+  rect(raqueteX, raqueteY, larguraRaquete, alturaRaquete);
+  
+  //Desenho do Placar
+  fill(0);
+  textAlign(LEFT);
+  textSize(12);
+  text("Pontos: " + pontos, 20, 20);
 }
 
 function gameOver() {
@@ -219,19 +239,6 @@ function vitoria() {
   
   if (keyIsDown(82)) { 
     reiniciar();
-  }
-}
-
-function gerarBlocos() {
-  blocos = []; 
-  for (let i = 0; i < 9; i++) {
-    for (let j = 0; j < 5; j++) {
-      blocos.push({ 
-        x: i * 60 + 25, 
-        y: j * 25 + 50, 
-        vivo: true 
-      });
-    }
   }
 }
 
